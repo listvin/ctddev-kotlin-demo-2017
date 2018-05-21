@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">BinSearch</string>
+    <string name="greeting">Wassup!</string>
+    <string-array name="operations_array">
+        <item>link</item>
+        <item>cut</item>
+        <item>connected</item>
+        <item>new</item>
+        <item>gen</item>
+    </string-array>
+</resources>
