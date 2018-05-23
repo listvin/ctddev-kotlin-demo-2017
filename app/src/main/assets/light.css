@@ -1,0 +1,37 @@
+:root{
+    --main:#1946BA;
+    --main75:#5374cb;
+    --main50:#8ca2dd;
+    --main25:#c6d1ee;
+    --accent:#EC0B43;
+    --spare:#3CB4E7;
+}
+
+.node_caption {
+    text-anchor:middle;
+    dominant-baseline:middle;
+    fill:white;
+}
+
+.node_body {
+    fill:var(--main);
+}
+
+.splay_edge {
+    fill:var(--main);
+}
+
+.link_edge {
+    fill:var(--main50);
+}
+
+.tree_edge {
+    stroke-dasharray:5,5;
+    stroke-width: 2px;
+    stroke:var(--accent);
+}
+
+.no_edge {
+    visibility: hidden;
+}
+

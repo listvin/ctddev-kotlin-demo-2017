@@ -57,7 +57,7 @@ class LCTree (val size: Int){
     }
 
     private fun checkId(id: Int){
-        if (id in 0 until size) throw IllegalArgumentException();
+        if (id !in 0 until size) throw IndexOutOfBoundsException();
     }
 
     fun link(aId: Int, bId: Int){
