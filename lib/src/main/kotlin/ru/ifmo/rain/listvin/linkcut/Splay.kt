@@ -84,7 +84,6 @@ class Splay<T>(
 
             private var pendingReverse = false
             internal fun orderReverse() {
-//                push() //TODO remove inversions and collapses
                 pendingReverse = !pendingReverse
             }
             private fun pushReverse() {
