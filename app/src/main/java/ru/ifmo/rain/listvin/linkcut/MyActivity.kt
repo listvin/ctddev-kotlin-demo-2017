@@ -58,12 +58,12 @@ class MyActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, View
 
         button.setOnClickListener(this)
 
-        editTextA.onFocusChangeListener = View.OnFocusChangeListener { view:View, haveFocus:Boolean ->
+        editTextA.onFocusChangeListener = View.OnFocusChangeListener { _:View, haveFocus:Boolean ->
             if (haveFocus) synchronized(argumentsExpected) {
                 lastedit = 0
             }
         }
-        editTextB.onFocusChangeListener = View.OnFocusChangeListener { view:View, haveFocus:Boolean ->
+        editTextB.onFocusChangeListener = View.OnFocusChangeListener { _:View, haveFocus:Boolean ->
             if (haveFocus) synchronized(argumentsExpected) {
                 lastedit = 1
             }
