@@ -9,16 +9,16 @@ class LCTreeTest {
     internal var lastSlowLC: SlowLinkCut? = null
 
     @Test
-    fun mixedTiny() = mixed(5, 10, 1_000_000)
+    fun mixedTiny() = mixed(5, 10, 50_000)
 
     @Test
-    fun mixedSmall() = mixed(30, 70, 100_000)
+    fun mixedSmall() = mixed(30, 70, 10_000)
 
     @Test
-    fun mixed() = mixed(5000, 1000, 1000)
+    fun mixed() = mixed(5000, 1000, 750)
 
     @Test
-    fun mixedBig() = mixed(100_000, 100_000, 10)
+    fun mixedBig() = mixed(50_000, 50_000, 10)
 
     internal fun mixed(treeCnt: Int, seqOps: Int, cycles: Int, cycleNum: Int = -1, opList: List<Int>? = null) {
         assert(treeCnt >= 2)

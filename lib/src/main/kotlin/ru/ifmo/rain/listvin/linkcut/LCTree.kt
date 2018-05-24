@@ -8,19 +8,19 @@ class LCTree (val size: Int){
 
     init {
         for (i in 0 until size) {
-            Splay(filament).isomorphicOne = Splay(filamentSz, rootValue = Unit)
+            Splay(filament).isomorphic = Splay(filamentSz, rootValue = Unit)
             filamentSz.last().resetNumValue(1)
         }
     }
 
-    private fun Splay<Any>.mirror(): Splay<Unit> {
-        return isomorphicOne!!
-    }
+//    private fun Splay<Any>.mirror(): Splay<Unit> {
+//        return isomorphic!!
+//    }
 
     private fun cutout(n: Splay.Node<Any>){
-        val szTree = n.tree.mirror().splitAfter(n.ordinal())
+        val szTree = n.tree.isomorphic!!.splitAfter(n.ordinal())
         val auxTree = n.tree.splitAfter(n)
-        auxTree.isomorphicOne = szTree
+        auxTree.isomorphic = szTree
         auxTree.ultra(0)?.value = n
     }
 
@@ -33,7 +33,7 @@ class LCTree (val size: Int){
             val link = n.value as Splay.Node<Any>
             n.value = null
             cutout(link)
-            link.tree.mirror() += n.tree.mirror()
+            link.tree.isomorphic!! += n.tree.isomorphic!!
             link.tree += n.tree
             n = n.tree.ultra(0)!!
         }
@@ -49,7 +49,7 @@ class LCTree (val size: Int){
     private fun makeAuxRoot(n: Splay.Node<Any>) {
         val oldRoot = findRoot(n) //expose made here
         if (oldRoot !== n) {
-            n.tree.mirror().pathReverse()
+            n.tree.isomorphic!!.pathReverse()
             n.tree.reverse()
             assert(n.tree.ultra(0) === n)
         }
@@ -68,11 +68,11 @@ class LCTree (val size: Int){
         makeAuxRoot(b) //size of this tree is increment itself
         expose(a) //this path will be incremented. this needed only for sizes support
 
-//        a.tree.mirror().inc(b.tree.mirror().ultra(0)!!.numValue)
-        val mb = b.tree.mirror()
+//        a.tree.isomorphic!!.inc(b.tree.isomorphic!!.ultra(0)!!.numValue)
+        val mb = b.tree.isomorphic!!
         val leftest = mb.ultra(0)!!
         val iv = leftest.numValue
-        val ma = a.tree.mirror()
+        val ma = a.tree.isomorphic!!
         ma.inc(iv)
 
         b.value = a
@@ -90,12 +90,12 @@ class LCTree (val size: Int){
         }
         //a should be parent of be here
         expose(a)
-        a.tree.mirror().inc(-b.tree.mirror().ultra(0)!!.numValue)
+        a.tree.isomorphic!!.inc(-b.tree.isomorphic!!.ultra(0)!!.numValue)
         b.value = null
         expose(b)
     }
 
     fun connected(aId: Int, bId: Int) = findRoot(filament[aId]) === findRoot(filament[bId])
 
-    fun size(aId: Int) = findRoot(filament[aId]).tree.mirror().ultra(0)!!.numValue
+    fun size(aId: Int) = findRoot(filament[aId]).tree.isomorphic!!.ultra(0)!!.numValue
 }

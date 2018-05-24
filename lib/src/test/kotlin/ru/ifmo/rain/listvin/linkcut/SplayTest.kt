@@ -104,10 +104,10 @@ class SplayTest {
 
     @Test
     fun seqFindSize() {
-        for (i in 0..500) {
+        for (i in 0..100) {
             val seq = genCharList(Rand[i] % 62 + 1)
             val tree = factoryC.fromList(seq)
-            for (query in 0..100) {
+            for (query in 0..50) {
                 val by = Rand[query] % tree.size
                 assertEquals(seq.size, tree.size, "iteration $i, sz-query $query failed")
                 assertEquals(seq[by], tree[by]?.value, "iteration $i, []-query $query failed")
@@ -417,11 +417,11 @@ class SplayTest {
     fun mixedShortSeqSmall() = mixed(5, 5, 1000, ::genCharList)
 
     @Test
-    fun mixedSeqSmall() = mixed(5, 500, 500, ::genCharList)
+    fun mixedSeqSmall() = mixed(5, 200, 200, ::genCharList)
 
     @Test
-    fun mixedShortSeq() = mixed(500, 10, 500, ::genUniqueRandomList)
+    fun mixedShortSeq() = mixed(500, 10, 50, ::genUniqueRandomList)
 
     @Test
-    fun mixedSeq() = mixed(250, 250, 100, ::genUniqueRandomList)
+    fun mixedSeq() = mixed(150, 150, 70, ::genUniqueRandomList)
 }
