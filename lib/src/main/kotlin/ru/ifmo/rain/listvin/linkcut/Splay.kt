@@ -5,7 +5,7 @@ class Splay<T>(
         rootValue: T? = null
 ) {
     /** initialized with globally unique ordinal num, not used internally in any way */
-    var isomorphicOne: Splay<Unit>? = null
+    var isomorphic: Splay<Unit>? = null
 
     class Factory<T> {
         private lateinit var result: Splay<T>
@@ -380,7 +380,7 @@ class Splay<T>(
         return ls
     }
 
-//    override fun toString() = "Splay'${isomorphicOne.toString().padStart(2, '_')}(${root?.toSubString()})"
+//    override fun toString() = "Splay'${isomorphic.toString().padStart(2, '_')}(${root?.toSubString()})"
     override fun toString() = "Splay(${root?.toSubString()})"
 
     val size: Int get() = root?.cnt ?: 0
