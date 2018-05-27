@@ -19,11 +19,12 @@ import kotlin.math.max
 import android.widget.LinearLayout.LayoutParams.MATCH_PARENT
 import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
 import android.content.res.TypedArray
-
-
+import java.util.*
+import kotlin.math.absoluteValue
 
 
 class MyActivity : AppCompatActivity(){
+    var random = Random()
     lateinit var selectedOperation: String
     var lastedit = 0
     var argumentsExpected = 2
@@ -78,11 +79,38 @@ class MyActivity : AppCompatActivity(){
                         setAnimationListener(object : Animation.AnimationListener{
                             override fun onAnimationRepeat(animation: Animation?) {}
                             override fun onAnimationEnd(animation: Animation?) {
-                                setImageDrawable(dice[rand()%6])
+                                setImageDrawable(dice[random.nextInt(6)])
                             }
                             override fun onAnimationStart(animation: Animation?) {}
                         })
                     })
+
+                    fun setEdits(a: Int, b: Int = DONT_CHANGE){
+                        editTextA.setText(a.toString())
+                        if (b != DONT_CHANGE) editTextB.setText(b.toString())
+                    }
+                    when(selectedOperation) {
+                        "new" -> setEdits(random.nextInt(representation.threshold-2) +2)
+                        "size" -> setEdits(random.nextInt(representation.size))
+                        "link" -> if (representation.edgesCnt < representation.size-1) {
+                            var a: Int
+                            var b: Int
+                            //do {
+                                a = random.nextInt(representation.size)
+                                b = random.nextIntEx(representation.size, a)
+                            //} while (representation.connected(a,b)) //this changes state of LCTree, but don't want extra copy:(
+                            setEdits(a,b)
+                        }
+                        "connected","conn" -> {
+                            val a = random.nextInt(representation.size)
+                            val b = random.nextIntEx(representation.size, a)
+                            setEdits(a,b)
+                        }
+                        "cut" -> if (representation.edgesCnt > 0) {
+                            val (a, b) = representation.getEdge(random.nextInt().absoluteValue)!!
+                            setEdits(a,b)
+                        }
+                    }
                 }
             }
 
@@ -101,7 +129,7 @@ class MyActivity : AppCompatActivity(){
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_my)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
 
         verticalLayout {
             horizontalLayout {
@@ -157,11 +185,13 @@ class MyActivity : AppCompatActivity(){
                 historyButton = imageButton {
                     setImageResource(R.drawable.ic_history_black_24dp)
                 }.onClick {
-                    lparams(visibility = View.INVISIBLE)
-                    historyView.lparams(width = WRAP_CONTENT, leftMargin = 4)
-                }.lparams(
-                        visibility = View.INVISIBLE
-                )
+                    historyView.apply {
+                        if (width == 0)
+                            lparams(width = WRAP_CONTENT, leftMargin = 4)
+                        else
+                            lparams(width = 0)
+                    }
+                }
             }
 
 
@@ -208,19 +238,17 @@ class MyActivity : AppCompatActivity(){
                 }.lparams(
                         width = 0,
                         height = MATCH_PARENT,
-                        weight = 1f
+                        weight = 1f,
+                        focusable = false
                 )
 
                 historyView = textView {//TODO possibly need scrollview with dummy here
                     setSingleLine(false)
                     scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
-                }.onClick{
-                    lparams(width = 0)
-                    historyButton.lparams(visibility = View.VISIBLE)
+                    setTextIsSelectable(true)
                 }.lparams(
-                        width = WRAP_CONTENT,
-                        height = MATCH_PARENT,
-                        leftMargin = 4
+                        width = 0,
+                        height = MATCH_PARENT
                 )
             }.lparams(
                     width = MATCH_PARENT,

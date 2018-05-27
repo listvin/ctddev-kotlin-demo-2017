@@ -14,8 +14,13 @@ fun String.toIntSafe(): Int? {
     }
 }
 
-val random = Random()
-fun rand() = random.nextInt().absoluteValue
+fun Random.nextIntEx(bound: Int, vararg ex: Int): Int{
+    var result: Int
+    do {
+        result = nextInt(bound)
+    } while (result in ex)
+    return result
+}
 
 fun AppCompatActivity.toast(text: String){
     Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
