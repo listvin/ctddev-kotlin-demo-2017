@@ -1,6 +1,8 @@
 package ru.ifmo.rain.listvin.dsl
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.support.v7.app.AppCompatActivity
 import android.text.InputType
@@ -154,7 +156,7 @@ fun MenuItem.imageView(verticalPad: Int, context: Context, drawable: Drawable): 
     )
     iv.setPadding(horizontalPad, verticalPad, horizontalPad, verticalPad)
     val outValue = TypedValue()
-    context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+    context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
     iv.setBackgroundResource(outValue.resourceId)
     actionView = iv
     return iv

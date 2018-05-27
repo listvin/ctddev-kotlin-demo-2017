@@ -7,6 +7,14 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true">
 
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ToggleButton"
+        tools:layout_editor_absoluteX="86dp"
+        tools:layout_editor_absoluteY="294dp" />
+
     <Space
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

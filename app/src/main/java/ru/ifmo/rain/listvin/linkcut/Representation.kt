@@ -9,7 +9,7 @@ typealias PInt = Pair<Int, Int>
 class Representation (val webView: WebView) {
     val threshold = 1000
 
-    lateinit var tree: LCTree
+    private lateinit var tree: LCTree
     var representable: Boolean = true
 
     private var request: PInt? = null
@@ -46,6 +46,16 @@ class Representation (val webView: WebView) {
     fun connected(a: Int, b: Int): Boolean = tree.connected(a, b).also { update() }
     fun size(a: Int): Int = tree.size(a).also { update() }
     val size: Int get() = tree.size
+    val edgesCnt: Int get() = edges.size
+    fun getEdge(num: Int): List<Int>? {
+        if (edges.size == 0) return null
+        var i = num%edges.size
+        for (edge in edges.values) {
+            if (i == 0) return listOf(edge.from, edge.to)
+            --i
+        }
+        return null
+    }
 
     private val edges: MutableMap<Int, Edge> = mutableMapOf()
     /**
@@ -168,7 +178,7 @@ class Representation (val webView: WebView) {
         }
     }
 
-    fun edgeId(from: Int, to: Int, undirected: Boolean = false): Int{
+    private fun edgeId(from: Int, to: Int, undirected: Boolean = false): Int{
         if (undirected) return if (from < to) edgeId(from, to) else edgeId(to, from)
         return from*threshold + to
     }
