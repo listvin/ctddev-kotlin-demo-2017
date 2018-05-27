@@ -1,19 +1,29 @@
 package ru.ifmo.rain.listvin.linkcut
 
 import android.annotation.SuppressLint
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.support.v7.app.AppCompatActivity
-import android.view.View
+import android.view.*
+import android.view.animation.Animation
+import android.view.animation.RotateAnimation
 import android.widget.*
 import com.example.demo.R
-import kotlinx.android.synthetic.main.activity_my.*
 import android.webkit.*
+import ru.ifmo.rain.listvin.dsl.*
+import kotlin.math.max
+import android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+import android.content.res.TypedArray
 
-class MyActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, View.OnClickListener {
-    lateinit var adapter: ArrayAdapter<CharSequence>
+
+
+
+class MyActivity : AppCompatActivity(){
     lateinit var selectedOperation: String
     var lastedit = 0
     var argumentsExpected = 2
@@ -33,100 +43,234 @@ class MyActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, View
         }
         true
     })
-    lateinit var tree: LCTree;
+
+    lateinit var fireAction: MenuItem
+    lateinit var helpAction: MenuItem
+    lateinit var diceAction: MenuItem
+    lateinit var editTextA: EditText
+    lateinit var editTextB: EditText
+    lateinit var statusView: TextView
+    lateinit var historyView: TextView
+    lateinit var historyButton: ImageButton
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        //FIXME
+        lateinit var dice: List<Drawable>
+        resources.apply { dice = (1..6).map{ getDrawable(getIdentifier("ic_dice_$it", "drawable", packageName),theme).apply { setTint(Color.WHITE) } } }
+        val styledAttributes = theme.obtainStyledAttributes(intArrayOf(android.R.attr.actionBarSize))
+        val verPad = styledAttributes.getDimension(0, 0f).toInt()
+        styledAttributes.recycle()
+
+        menu!!.items {
+            helpAction = menuItem("help") {
+                imageView(verPad,this@MyActivity, resources.getDrawable(R.drawable.ic_help_outline_black_24dp, theme).apply { setTint(Color.WHITE) }).onClick {
+                    toast("help not implemented yet")
+                }
+            }
+
+            diceAction = menuItem("dice") {
+                imageView(verPad,this@MyActivity, dice[0]).onClick {
+                    startAnimation(RotateAnimation(
+                            0f, 360f,
+                            Animation.RELATIVE_TO_SELF, 0.5f,
+                            Animation.RELATIVE_TO_SELF, 0.5f).apply {
+                        duration = 250
+                        setAnimationListener(object : Animation.AnimationListener{
+                            override fun onAnimationRepeat(animation: Animation?) {}
+                            override fun onAnimationEnd(animation: Animation?) {
+                                setImageDrawable(dice[rand()%6])
+                            }
+                            override fun onAnimationStart(animation: Animation?) {}
+                        })
+                    })
+                }
+            }
+
+            fireAction = menuItem("fire") {
+                imageView(verPad,this@MyActivity, resources.getDrawable(R.drawable.ic_fire, theme).apply { setTint(Color.WHITE) }).onClick {
+                    perform(selectedOperation,
+                            editTextA.text.toString().toIntSafe() ?: 0,
+                            editTextB.text.toString().toIntSafe() ?: 0)
+                }
+            }
+        }
+
+        return true
+    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_my)
+//        setContentView(R.layout.activity_my)
 
-        webView.getSettings().setJavaScriptEnabled(true)
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                perform("new", 12)
+        verticalLayout {
+            horizontalLayout {
+                spinner {
+                    val adapter = ArrayAdapter.createFromResource(this@MyActivity, R.array.operations_array, android.R.layout.simple_spinner_item)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    this.adapter = adapter
+                }.onItemSelected {
+                    synchronized(argumentsExpected) {
+                        selectedOperation = it
+                        argumentsExpected = when (selectedOperation) {
+                            "size" -> 1
+                            "new", "gen" -> 0
+                            else -> 2
+                        }
+                        lastedit = max(argumentsExpected - 1, 0)
+                    }
+                    @SuppressLint
+                    when (selectedOperation) {
+                        "new" ->
+                            editTextA.apply { if (hint != "size") { hint = "size"; text.clear() } }
+                        "conn","connected","cut","link","size" ->
+                            editTextA.apply { if (hint != "node") { hint = "node"; text.clear() } }
+                        "gen" ->
+                            {} //TODO gen hints
+                    }
+                    editTextB.visibility = if (argumentsExpected <= 1) View.INVISIBLE else View.VISIBLE
+                }.lparams(
+                        leftMargin = 4
+                )
+
+
+                editTextA = editNumber (3) {
+                    hint = "node"
+                }.onFocusChange {
+                    synchronized(argumentsExpected) { lastedit = if (it) 1 % max(1, argumentsExpected) else 0 }
+                }.lparams(
+                        leftMargin = 4
+                )
+
+
+                editTextB = editNumber (3) {
+                    hint = "node"
+                }.lparams(
+                        leftMargin = 8
+                )
+
+                space {}.lparams(
+                        width = 0,
+                        weight = 1f
+                )
+
+                historyButton = imageButton {
+                    setImageResource(R.drawable.ic_history_black_24dp)
+                }.onClick {
+                    lparams(visibility = View.INVISIBLE)
+                    historyView.lparams(width = WRAP_CONTENT, leftMargin = 4)
+                }.lparams(
+                        visibility = View.INVISIBLE
+                )
             }
-        }
-        webView.loadUrl("file:///android_asset/main.html")
-        webView.addJavascriptInterface(JSInterface(), "Feedback")
 
-        adapter = ArrayAdapter.createFromResource(this,
-                R.array.operations_array, android.R.layout.simple_spinner_item)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        selectedOperation = adapter.getItem(0).toString()
-        spinner.adapter = adapter
-        spinner.onItemSelectedListener = this
 
-        button.setOnClickListener(this)
+            statusView = textView {
+                text = "Hello, DSL!"
+                setSingleLine(false)
+            }.lparams(
+                    width = MATCH_PARENT,
+                    height = WRAP_CONTENT,
+                    leftMargin = 16,
+                    topMargin = 8,
+                    rightMargin = 8,
+                    bottomMargin = 8
+            )
 
-        editTextA.onFocusChangeListener = View.OnFocusChangeListener { _:View, haveFocus:Boolean ->
-            if (haveFocus) synchronized(argumentsExpected) {
-                lastedit = 0
-            }
-        }
-        editTextB.onFocusChangeListener = View.OnFocusChangeListener { _:View, haveFocus:Boolean ->
-            if (haveFocus) synchronized(argumentsExpected) {
-                lastedit = 1
-            }
+
+            horizontalLayout {
+                webView {
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            perform("new", 12)
+                            rundebug()
+                            statusView.setText("last operation status will be displayed here")
+                        }
+                    }
+                    settings.javaScriptEnabled = true
+                    loadUrl("file:///android_asset/main.html")
+                    addJavascriptInterface(object {
+                        @JavascriptInterface
+                        fun touched(id: Int) {
+                            synchronized(argumentsExpected) {
+                                if (argumentsExpected == 0) return
+                                lastedit = (1 - lastedit) % argumentsExpected
+                                Message.obtain(this@MyActivity.handler, lastedit, id).sendToTarget()
+                            }
+                        }
+
+                        @JavascriptInterface
+                        fun toast(text: String) = this@MyActivity.toast(text)
+                    }, "Feedback")
+                    representation = Representation(this)
+                    //TODO set height
+                    //Resources.getSystem().displayMetrics.heightPixels
+                }.lparams(
+                        width = 0,
+                        height = MATCH_PARENT,
+                        weight = 1f
+                )
+
+                historyView = textView {//TODO possibly need scrollview with dummy here
+                    setSingleLine(false)
+                    scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
+                }.onClick{
+                    lparams(width = 0)
+                    historyButton.lparams(visibility = View.VISIBLE)
+                }.lparams(
+                        width = WRAP_CONTENT,
+                        height = MATCH_PARENT,
+                        leftMargin = 4
+                )
+            }.lparams(
+                    width = MATCH_PARENT,
+                    height = 0,
+                    weight = 1f
+            )
         }
     }
 
-    inner class JSInterface {
-        @JavascriptInterface
-        fun touched(id: Int) {
-            synchronized(argumentsExpected) {
-                if (argumentsExpected == 0) return
-                lastedit = (1 - lastedit) % argumentsExpected
-                Message.obtain(handler, lastedit, id).sendToTarget()
-            }
-        }
-
-        @JavascriptInterface
-        fun alert(text: String){
-            Toast.makeText(this@MyActivity, text, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun wvexec(com: String) = webView.loadUrl("javascript:graph.$com")
-
-    private fun perform(op: String, arg1: Int, arg2: Int = 0) {
+    private lateinit var representation: Representation
+    private val NO_ARG = -1577384758
+    fun perform(op: String, a: Int, b: Int = NO_ARG) {
         var explanation = "this feature is not implemented yet"
         var customMessage: String? = null
+        var reply = ""
         if (try {
-                    when (op) {
+                    if (a == b && argumentsExpected == 2) {
+                        explanation = "nodes are expected to be distinct."
+                        false
+                    } else when (op) {
                         "new" -> {
-                            tree = LCTree(arg1)
-                            wvexec("clear()")
-                            for (i in 0 until arg1) wvexec("addNode($i)")
+                            if (!representation.new(a)) {
+                                customMessage = "despite visualisation for $a nodes will be missing, processing will be complete as usual"
+                            }
                             true
                         }
                         "link" -> {
-                            tree.link(arg1, arg2)
-                            wvexec("addLink($arg1, $arg2, '_t')") //TODO move to representation
+                            representation.link(a, b)
                             true
                         }
                         "cut" -> {
-                            if (tree.connected(arg1, arg2) /*&& TODO edge presence check*/) {
-                                tree.cut(arg1, arg2)
-                                wvexec("removeEdge($arg1, $arg2, '_t')") //TODO move to representation
+                            if (representation.cut(a, b)) {
                                 true
                             } else {
-                                explanation = "can cut only existing and specific edges"
+                                explanation = "can cut only existing specific edges"
                                 false
                             }
                         }
-                        "connected" -> {
-                            if (arg1 == arg2) {
-                                explanation = "nodes are expected to be different."
-                                false
-                            } else {
-                                customMessage = "Nodes $arg1 & $arg2 are" +
-                                        (if (tree.connected(arg1, arg2)) "" else " NOT") +
-                                        " connected."
-                                true
-                            }
+                        "connected", "conn" -> {
+                            val r = representation.connected(a, b)
+                            customMessage = "Nodes $a & $b are" +
+                                    (if (r) "" else " NOT") +
+                                    " connected."
+                            reply = if (r) " yes" else " no"
+                            true
                         }
                         "size" -> {
-                            customMessage = "Size of node number $arg1 tree is ${tree.size(arg1)}"
+                            val r = representation.size(a)
+                            customMessage = "Size of node number $a tree is $r"
+                            reply = " = $r"
                             true
                         }
                         else -> {
@@ -134,42 +278,23 @@ class MyActivity : AppCompatActivity(), AdapterView.OnItemSelectedListener, View
                         }
                     }
                 } catch (e: IndexOutOfBoundsException) {
-                    explanation = "node numbers must be in [0;${tree.size})"
+                    explanation = "node numbers must be in [0;${representation.size})"
                     false
                 } catch (e: IllegalStateException) {
                     explanation = "these nodes are already connected"
                     false
                 }) {
             @SuppressLint
-            textView.text = customMessage ?: "" +
-                    "'$selectedOperation $arg1" +
-                    (if (argumentsExpected == 2) " $arg2" else "") +
+            statusView.text = customMessage ?: "" +
+                    "'$op $a" +
+                    (if (argumentsExpected == 2) " $b" else "") +
                             "' performed successfully"
+            if (op == "new") historyView.clearComposingText()
+            @SuppressLint
+            historyView.text = "${historyView.text}${if (op == "connected") "conn" else op} $a${if (argumentsExpected == 2 && b != NO_ARG) " $b" else ""}$reply\n"
         } else {
             @SuppressLint
-            textView.text = "$selectedOperation failed, because $explanation"
+            statusView.text = "$selectedOperation failed, because $explanation"
         }
-    }
-
-    override fun onClick(v: View?) {
-        val arg1 = editTextA.text.toString().toIntSafe() ?: 0
-        val arg2 = editTextB.text.toString().toIntSafe() ?: 0
-        perform(selectedOperation, arg1, arg2)
-    }
-
-    override fun onNothingSelected(parent: AdapterView<*>?) {
-        throw IllegalArgumentException()
-    }
-
-    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        selectedOperation = parent!!.getItemAtPosition(position) as String
-        synchronized(argumentsExpected) {
-            argumentsExpected = when (selectedOperation) {
-                "size" -> 1
-                "new", "gen" -> 0
-                else -> 2
-            }
-        }
-        editTextB.visibility = if (argumentsExpected <= 1) View.INVISIBLE else View.VISIBLE
     }
 }

@@ -7,6 +7,16 @@ graph.removeEdge = function (from, to) {
     graph.forEachLinkedNode(from, function (node, link) { if (node.id === to) graph.removeLink(link); } );
 };
 
+graph.modifyEdge = function (from, to, data) {
+    graph.removeEdge(from, to);
+    graph.addLink(from, to, data);
+};
+
+graph.addEdge = function (from, to, data) {
+    graph.removeEdge(from, to);
+    graph.addLink(from, to, data);
+};
+
 if (typeof Feedback === "undefined") {
     graph.addNode(0);
     graph.addNode(1);
@@ -16,15 +26,33 @@ if (typeof Feedback === "undefined") {
     graph.addLink(0, 1, "_t");
 }
 
+var prevTouch = -1;
+function getNodeUI(id) {
+    return document.getElementById("nodeNumber"+id)
+}
+function dropTouch(){
+    if (prevTouch !== -1 && graph.getNode(prevTouch) !== undefined)
+        getNodeUI(prevTouch).attr('class','node_body');
+    prevTouch = -1;
+}
+function setTouch(id){
+    dropTouch();
+    getNodeUI(id).attr('class','node_selected');
+    prevTouch = id;
+}
+
 graphics.node(function(node) {
     var caption = Viva.Graph.svg('text').attr('class','node_caption');
     caption.textContent = node.id.toString();
 
     var g = Viva.Graph.svg('g');
-    g.append(Viva.Graph.svg('circle').attr('r', nodeSize).attr('class','node_body'));
+    g.append(Viva.Graph.svg('circle').attr('r', nodeSize).attr('class','node_body').attr('id','nodeNumber'+node.id));
     g.append(caption);
     g.addEventListener("touchend", function() {
         Feedback.touched(node.id)
+    });
+    g.addEventListener("touchstart", function() {
+        setTouch(node.id)
     });
     return g
 }).placeNode(function(nodeUI, pos) {
@@ -84,3 +112,7 @@ var renderer = Viva.Graph.View.renderer(graph, {
         layout: layout
     });
 renderer.run();
+
+document.getElementsByTagName("svg")[0].addEventListener("touchstart", function() {
+    dropTouch()
+});

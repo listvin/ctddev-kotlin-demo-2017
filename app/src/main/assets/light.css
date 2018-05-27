@@ -17,6 +17,10 @@
     fill:var(--main);
 }
 
+.node_selected {
+    fill:var(--accent);
+}
+
 .splay_edge {
     fill:var(--main);
 }
