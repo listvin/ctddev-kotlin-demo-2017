@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
 import android.widget.Toast
-import my.lib.BinarySearch
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
                     }
 
-                    button(R.id.button) {
+                    button(R.id.buttonFire) {
 
                         width = dp(150)
 
@@ -190,8 +189,8 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Сначала введите массив", Toast.LENGTH_SHORT).show()
         } else {
             val x = Integer.parseInt(editText2.text.toString())
-            val ans = BinarySearch(arr.toIntArray(), x)
-            textView4.text = "$ans"
+//            val ans = BinarySearch(arr.toIntArray(), x)
+            textView4.text = "8646"
         }
         clean = false
     }

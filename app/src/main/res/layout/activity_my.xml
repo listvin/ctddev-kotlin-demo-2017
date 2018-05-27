@@ -7,75 +7,104 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true">
 
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteX="109dp"
+        tools:layout_editor_absoluteY="134dp" />
+
     <EditText
+        android:id="@+id/editTextA"
         android:layout_width="138dp"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/editTextA"
-        app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="16dp"
-        android:singleLine="true"
-        android:selectAllOnFocus="true"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="16dp"
+        android:ems="10"
+        android:inputType="number"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="LabelFor" />
 
     <EditText
+        android:id="@+id/editTextB"
         android:layout_width="138dp"
         android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/editTextB"
-        app:layout_constraintStart_toEndOf="@+id/editTextA"
-        android:layout_marginStart="28dp"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="28dp"
         android:layout_marginTop="16dp"
+        android:ems="10"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/editTextA"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="LabelFor" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/buttonFire"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
-        android:text="Button"
+        android:text="F"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextA" />
 
     <TextView
-        android:text="TextView"
+        android:id="@+id/textView"
         android:layout_width="293dp"
         android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="20dp"
+        android:text="Last operation status will be here"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginStart="8dp" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonFire" />
 
     <Spinner
         android:id="@+id/spinner"
-        android:layout_width="208dp"
+        android:layout_width="106dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="28dp"
         android:spinnerMode="dropdown"
-        app:layout_constraintStart_toEndOf="@+id/button"
+        app:layout_constraintStart_toEndOf="@+id/buttonFire"
         app:layout_constraintTop_toBottomOf="@+id/editTextB" />
 
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="268dp"
+        android:layout_marginBottom="0dp"
         android:layout_marginStart="0dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="0dp"
+        android:focusableInTouchMode="false"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView" >
+
+    </WebView>
+
+    <ScrollView
+        android:layout_width="304dp"
+        android:layout_height="252dp"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+    <Button
+        android:id="@+id/buttonRoll"
+        android:layout_width="41dp"
+        android:layout_height="47dp"
+        android:text="D"
+        tools:layout_editor_absoluteX="263dp"
+        tools:layout_editor_absoluteY="76dp" />
 
 </android.support.constraint.ConstraintLayout>

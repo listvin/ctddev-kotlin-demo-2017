@@ -56,12 +56,7 @@ class LCTree (val size: Int){
         expose(n)
     }
 
-    private fun checkId(id: Int){
-        if (id !in 0 until size) throw IndexOutOfBoundsException();
-    }
-
     fun link(aId: Int, bId: Int){
-        checkId(aId); checkId(bId)
         if (connected(aId, bId)) throw IllegalStateException()
         val a = filament[aId]
         val b = filament[bId]
@@ -80,7 +75,6 @@ class LCTree (val size: Int){
     }
 
     fun cut(aId: Int, bId: Int){
-        checkId(aId); checkId(bId)
         var a = filament[aId]
         var b = filament[bId]
         if (a.value === b || b.value !== a && b < a) {
