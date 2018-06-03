@@ -59,7 +59,6 @@ class MyActivity : AppCompatActivity(){
     lateinit var helpDialog: AlertDialog
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        //FIXME
         lateinit var dice: List<Drawable>
         resources.apply { dice = (1..6).map{ getDrawable(getIdentifier("ic_dice_$it", "drawable", packageName),theme).apply { setTint(Color.WHITE) } } }
         val styledAttributes = theme.obtainStyledAttributes(intArrayOf(android.R.attr.actionBarSize))

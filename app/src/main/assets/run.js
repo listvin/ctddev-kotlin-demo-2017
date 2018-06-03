@@ -14,6 +14,14 @@ var graph = Viva.Graph.graph();
 var graphics = Viva.Graph.View.svgGraphics();
 var subscription = [];
 
+graph.showPlug = function(){
+    document.getElementById("toomuch").style.display = "block";
+};
+
+graph.hidePlug = function(){
+    document.getElementById("toomuch").style.display = "none";
+};
+
 graph.removeEdge = function (from, to) {
     graph.forEachLinkedNode(from, function (node, link) { if (node.id === to) graph.removeLink(link); } );
 };

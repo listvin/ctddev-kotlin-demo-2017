@@ -7,10 +7,16 @@ import kotlin.math.min
 typealias PInt = Pair<Int, Int>
 
 class Representation (val webView: WebView) {
-    val threshold = 1000
+    val threshold = 200
 
     private lateinit var tree: LCTree
     var representable: Boolean = true
+        private set(value) {
+            if (field != value) {
+                wvexec(if (value) "hidePlug()" else "showPlug()")
+            }
+            field = value
+        }
 
     private var request: PInt? = null
         get() = field.also { field = null }
@@ -96,7 +102,6 @@ class Representation (val webView: WebView) {
             }
         }
 
-        //TODO remove this and all .undirected-related things
         /*request?.apply {
             when (requestType) {
                 Status.PRESENTED -> (getUndirectedEdge(first, second) ?: throw IllegalStateException()).undirected = false
@@ -194,7 +199,7 @@ class Representation (val webView: WebView) {
 
     private fun edgeId(from: Int, to: Int, undirected: Boolean = false): Int{
         if (undirected) return if (from < to) edgeId(from, to) else edgeId(to, from)
-        return from*threshold + to
+        return from*1_000_000_000 + to
     }
 
     private fun wvexec(com: String) = webView.loadUrl("javascript:graph.$com")
