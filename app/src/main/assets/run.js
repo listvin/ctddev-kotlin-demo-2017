@@ -1,7 +1,18 @@
 var nodeSize = 12;
+var nodeGuardSize = 9;
+var dashPeriod = 9;
+var nodeHitBoxSize = 14;
+
+Array.prototype.expand = function(newSize, fun){
+    for (var i = length; i < newSize; ++i) this.push(fun())
+};
+Array.prototype.remove = function(what){
+    this.splice(this.indexOf(what), 1);
+};
 
 var graph = Viva.Graph.graph();
 var graphics = Viva.Graph.View.svgGraphics();
+var subscription = [];
 
 graph.removeEdge = function (from, to) {
     graph.forEachLinkedNode(from, function (node, link) { if (node.id === to) graph.removeLink(link); } );
@@ -17,14 +28,58 @@ graph.addEdge = function (from, to, data) {
     graph.addLink(from, to, data);
 };
 
-if (typeof Feedback === "undefined") {
-    graph.addNode(0);
-    graph.addNode(1);
-    graph.addLink(0, 1, "_t");
-    graph.addLink(1, 2, "st");
-    graph.addLink(2, 3, "l_");
-    graph.addLink(0, 1, "_t");
+graph.clearUndirectedEdges = function() {
+    var list = document.getElementsByClassName("tree_edge");
+    for (var i = 0; i < list.length; ++i) {
+        console.log(list[i]);
+        SVG_rootg.removeChild(list[i]);
+    }
+};
+
+function redrawUEdge(uEdgeUI){
+    var fromPos = getNodeUI(uEdgeUI.__from);
+    var toPos = getNodeUI(uEdgeUI.__to);
+
+    var dx = toPos.x - fromPos.x;
+    var dy = toPos.y - fromPos.y;
+    var len = Math.sqrt(dx * dx + dy * dy);
+    var shift = (len%dashPeriod)/4.0;
+    dx /= len;
+    dy /= len;
+
+    var fromPosC = {}, toPosC = {};
+
+    fromPosC.x = fromPos.x + dx * (nodeGuardSize + shift);
+    fromPosC.y = fromPos.y + dy * (nodeGuardSize + shift);
+    toPosC.x = toPos.x - dx * nodeGuardSize;
+    toPosC.y = toPos.y - dy * nodeGuardSize;
+
+    // var a = getNodeUI(uEdgeUI.__from);
+    // var b = getNodeUI(uEdgeUI.__to);
+    // var A = {}, B = {};
+    // A.x = a.getAttribute("cx");
+    // A.y = a.getAttribute("cy");
+    // B.x = b.getAttribute("cx");
+    // B.y = b.getAttribute("cy");
+    uEdgeUI.attr("d", "M " + strPair(fromPosC) + "L " + strPair(toPosC));
 }
+
+graph.addUndirectedEdge = function (a, b) {
+    var uEdgeUI = Viva.Graph.svg('path').attr("class", "tree_edge");
+    uEdgeUI.id = "uedge" + Math.min(a,b) + "_" + Math.max(a,b);
+    uEdgeUI.__from = a;
+    uEdgeUI.__to = b;
+    subscription[a].push(uEdgeUI);
+    subscription[b].push(uEdgeUI);
+    redrawUEdge(uEdgeUI);
+    SVG_rootg.append(uEdgeUI);
+};
+
+graph.removeUndirectedEdge = function (a, b) {
+    SVG_rootg.removeChild(document.getElementById("uedge" + Math.min(a,b) + "_" + Math.max(a,b)));
+    subscription[a].remove(b);
+    subscription[b].remove(a);
+};
 
 var prevTouch = -1;
 function getNodeUI(id) {
@@ -46,8 +101,12 @@ graphics.node(function(node) {
     caption.textContent = node.id.toString();
 
     var g = Viva.Graph.svg('g');
+    g.__id = node.id;
+    if (node.id >= subscription.length) subscription.expand(node.id+1, function () { return [] });
+
     g.append(Viva.Graph.svg('circle').attr('r', nodeSize).attr('class','node_body').attr('id','nodeNumber'+node.id));
     g.append(caption);
+    g.append(Viva.Graph.svg('circle').attr('r', nodeHitBoxSize).attr('fill','transparent'));
     g.addEventListener("touchend", function() {
         Feedback.touched(node.id)
     });
@@ -57,7 +116,13 @@ graphics.node(function(node) {
     return g
 }).placeNode(function(nodeUI, pos) {
     nodeUI.children[0].attr('cx', pos.x).attr('cy', pos.y);
+    nodeUI.children[0].x = pos.x; //because svg seems to spoil attributes time to time
+    nodeUI.children[0].y = pos.y;
     nodeUI.children[1].attr('x', pos.x).attr('y', pos.y);
+    nodeUI.children[2].attr('cx', pos.x).attr('cy', pos.y);
+    subscription[nodeUI.__id].forEach(function (artiPath) {
+        redrawUEdge(artiPath)
+    })
 });
 
 function strPair(pnt){
@@ -90,11 +155,13 @@ graphics.link(function(link){
     var dx = toPos.x - fromPos.x;
     var dy = toPos.y - fromPos.y;
     var len = Math.sqrt(dx * dx + dy * dy);
+    dx /= len;
+    dy /= len;
     var normR = {}, normL = {};
-    normR.x = fromPos.x + dy / len * nodeSize;
-    normR.y = fromPos.y - dx / len * nodeSize;
-    normL.x = fromPos.x - dy / len * nodeSize;
-    normL.y = fromPos.y + dx / len * nodeSize;
+    normR.x = fromPos.x + dy * nodeSize;
+    normR.y = fromPos.y - dx * nodeSize;
+    normL.x = fromPos.x - dy * nodeSize;
+    normL.y = fromPos.y + dx * nodeSize;
     linkUI.children[0].attr("points", strPair(normR) + strPair(normL) + strPair(toPos));
 
     linkUI.children[1].attr("d", 'M' + fromPos.x + ',' + fromPos.y + 'L' + toPos.x + ',' + toPos.y);
@@ -103,7 +170,7 @@ graphics.link(function(link){
 var layout = Viva.Graph.Layout.forceDirected(graph, {
     springLength : nodeSize*5,
     springCoeff : 5e-5,
-    dragCoeff : 0.02,
+    dragCoeff : 3e-2,
     gravity : -1.5e-1
 });
 
@@ -116,3 +183,17 @@ renderer.run();
 document.getElementsByTagName("svg")[0].addEventListener("touchstart", function() {
     dropTouch()
 });
+
+SVG_rootg = document.getElementsByTagName("svg")[0].children[0];
+
+if (typeof Feedback === "undefined") {
+    graph.addNode(0);
+    graph.addNode(1);
+    // graph.addLink(0, 1, "_t");
+    graph.addLink(1, 2, "s_");
+    graph.addLink(2, 3, "l_");
+
+    // setTimeout(500, function () {
+        graph.addUndirectedEdge(0,1);
+    // });
+}

@@ -11,6 +11,7 @@
     text-anchor:middle;
     dominant-baseline:middle;
     fill:white;
+    pointer-events:none;
 }
 
 .node_body {
@@ -30,7 +31,7 @@
 }
 
 .tree_edge {
-    stroke-dasharray:5,5;
+    stroke-dasharray:4,3;
     stroke-width: 2px;
     stroke:var(--accent);
 }

@@ -2,11 +2,11 @@
     <string name="app_name">Link-Cut-Size</string>
     <string name="greeting">Aloha!</string>
     <string-array name="operations_array">
-        <item>connected</item>
-        <item>size</item>
         <item>link</item>
         <item>cut</item>
+        <item>size</item>
+        <item>connected</item>
         <item>new</item>
-        <item>gen</item>
+        <!--<item>gen</item>-->
     </string-array>
 </resources>

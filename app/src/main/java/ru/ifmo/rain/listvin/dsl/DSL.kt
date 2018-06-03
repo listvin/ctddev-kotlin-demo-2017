@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.text.InputType
 import android.util.TypedValue
@@ -16,6 +17,7 @@ import android.widget.LinearLayout.HORIZONTAL
 import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout.LayoutParams.MATCH_PARENT
 import android.widget.LinearLayout.LayoutParams
+import org.w3c.dom.Text
 
 @DslMarker
 annotation class UIConstructor
@@ -162,6 +164,7 @@ fun MenuItem.imageView(verticalPad: Int, context: Context, drawable: Drawable): 
     return iv
 }
 
+@UIConstructor
 fun <T:View> T.onClick(listener: T.() -> Unit): T {
     setOnClickListener { v ->
         @Suppress("UNCHECKED_CAST")
@@ -170,7 +173,30 @@ fun <T:View> T.onClick(listener: T.() -> Unit): T {
     return this
 }
 
+@UIConstructor
 fun Context.dp(dps: Int): Int {
     return (dps * resources.displayMetrics.density + 0.5f).toInt()
 }
 
+@UIConstructor
+fun AppCompatActivity.alertDialog(init: AlertDialog.Builder.() -> Unit): AlertDialog.Builder{
+    val aldiag = AlertDialog.Builder(this)
+    aldiag.init()
+    return aldiag
+}
+
+@UIConstructor
+fun AlertDialog.Builder.linearLayout(init: LinearLayout.() -> Unit): LinearLayout {
+    val ll = LinearLayout(this.context)
+    this.setView(ll)
+    ll.init()
+    return ll
+}
+
+//@UIConstructor
+//fun FrameLayout.textView(init: TextView.() -> Unit): TextView {
+//    val tv = TextView(this.context)
+//    this.addView(tv)
+//    tv.init()
+//    return tv
+//}

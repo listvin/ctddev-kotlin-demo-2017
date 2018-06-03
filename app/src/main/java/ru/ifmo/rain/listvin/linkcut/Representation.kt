@@ -28,7 +28,12 @@ class Representation (val webView: WebView) {
     }
 
     fun link(a: Int, b: Int){
-        tree.link(a, b)
+        try {
+            tree.link(a, b)
+        } catch (ise: IllegalStateException) {
+            update()
+            throw ise
+        }
         request(a, b, Status.CREATED)
         update()
     }
@@ -68,6 +73,7 @@ class Representation (val webView: WebView) {
         edges.clear()
         request = null
         wvexec("clear()")
+        wvexec("clearUndirectedEdges()")
         representable = size <= threshold
         if (representable) {
             for (i in 0 until size) wvexec("addNode($i)")
@@ -90,10 +96,18 @@ class Representation (val webView: WebView) {
             }
         }
 
-        request?.apply {
+        //TODO remove this and all .undirected-related things
+        /*request?.apply {
             when (requestType) {
                 Status.PRESENTED -> (getUndirectedEdge(first, second) ?: throw IllegalStateException()).undirected = false
                 Status.CREATED -> forceUndirectedEdge(first, second).undirected = true
+                else -> IllegalStateException()
+            }
+        }*/
+        request?.apply {
+            when(requestType) {
+                Status.PRESENTED -> wvexec("removeUndirectedEdge($first, $second)")
+                Status.CREATED -> wvexec("addUndirectedEdge($first, $second)")
                 else -> IllegalStateException()
             }
         }

@@ -1,6 +1,7 @@
 package ru.ifmo.rain.listvin.linkcut
 
 import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -19,6 +20,8 @@ import kotlin.math.max
 import android.widget.LinearLayout.LayoutParams.MATCH_PARENT
 import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
 import android.content.res.TypedArray
+import android.support.v7.app.AlertDialog
+import android.text.Html
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -53,6 +56,7 @@ class MyActivity : AppCompatActivity(){
     lateinit var statusView: TextView
     lateinit var historyView: TextView
     lateinit var historyButton: ImageButton
+    lateinit var helpDialog: AlertDialog
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         //FIXME
@@ -66,6 +70,8 @@ class MyActivity : AppCompatActivity(){
             helpAction = menuItem("help") {
                 imageView(verPad,this@MyActivity, resources.getDrawable(R.drawable.ic_help_outline_black_24dp, theme).apply { setTint(Color.WHITE) }).onClick {
                     toast("help not implemented yet")
+                }.onClick {
+                    helpDialog.show()
                 }
             }
 
@@ -233,8 +239,6 @@ class MyActivity : AppCompatActivity(){
                         fun toast(text: String) = this@MyActivity.toast(text)
                     }, "Feedback")
                     representation = Representation(this)
-                    //TODO set height
-                    //Resources.getSystem().displayMetrics.heightPixels
                 }.lparams(
                         width = 0,
                         height = MATCH_PARENT,
@@ -242,7 +246,7 @@ class MyActivity : AppCompatActivity(){
                         focusable = false
                 )
 
-                historyView = textView {//TODO possibly need scrollview with dummy here
+                historyView = textView {
                     setSingleLine(false)
                     scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
                     setTextIsSelectable(true)
@@ -256,6 +260,27 @@ class MyActivity : AppCompatActivity(){
                     weight = 1f
             )
         }
+
+        helpDialog = alertDialog {
+            setTitle("Help")
+            linearLayout {
+                textView {
+                    val res = resources.openRawResource(R.raw.help)
+                    val buf = ByteArray(res.available())
+                    res.read(buf)
+                    text = Html.fromHtml(String(buf))
+                    setSingleLine(false)
+                    scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
+                    setTextIsSelectable(true)
+                }.lparams(
+                        leftMargin = 8,
+                        rightMargin = 8,
+                        topMargin = 8,
+                        width = MATCH_PARENT,
+                        height = MATCH_PARENT
+                )
+            }
+        }.setPositiveButton("Got it!") { _: DialogInterface, _: Int -> }.create()
     }
 
     private lateinit var representation: Representation
@@ -271,7 +296,7 @@ class MyActivity : AppCompatActivity(){
                     } else when (op) {
                         "new" -> {
                             if (!representation.new(a)) {
-                                customMessage = "despite visualisation for $a nodes will be missing, processing will be complete as usual"
+                                customMessage = "despite visualisation for $a nodes will be missing, processing will be completed as usual"
                             }
                             true
                         }
@@ -317,7 +342,7 @@ class MyActivity : AppCompatActivity(){
                     "'$op $a" +
                     (if (argumentsExpected == 2) " $b" else "") +
                             "' performed successfully"
-            if (op == "new") historyView.clearComposingText()
+            if (op == "new") historyView.text = ""
             @SuppressLint
             historyView.text = "${historyView.text}${if (op == "connected") "conn" else op} $a${if (argumentsExpected == 2 && b != NO_ARG) " $b" else ""}$reply\n"
         } else {
